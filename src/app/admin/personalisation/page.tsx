@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import { Flash } from "@/components/flash";
 import { PageIntro } from "@/components/page-intro";
 import { formatMinor } from "@/lib/money";
@@ -7,6 +8,7 @@ import { addFieldAction, attachTemplateAction, createTemplateAction, removeField
 export const metadata = { title: "Personalisation" };
 
 export default async function PersonalisationAdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireRole(["admin", "curator"], "/admin/personalisation");
   const params = await searchParams;
   const client = await createUserClient();
   const { data: templates } = (await client?.from("personalisation_templates").select("*, fields:personalisation_fields(key, label, field_type, is_required, max_length, display_order), books:book_personalisation(is_enabled, book:books(title))").order("name")) ?? { data: [] };

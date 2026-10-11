@@ -61,4 +61,29 @@ describe("architecture", () => {
       expect(read(f).trimStart().startsWith('"use server"'), f).toBe(true);
     }
   });
+
+  it("requires an explicit role check in every admin page and admin action", () => {
+    const targets = files.filter((f) => f.startsWith("src/app/admin/") && /\/(page\.tsx|actions\.ts)$/.test(f));
+    expect(targets.length).toBeGreaterThan(10);
+    for (const f of targets) expect(read(f), `${f} must call requireRole`).toMatch(/requireRole\(/);
+  });
+
+  it("keeps payment, webhook and cron routes uncached and behind their own verification", () => {
+    const routes = {
+      "src/app/api/webhooks/razorpay/route.ts": "verifyWebhookSignature",
+      "src/app/api/payments/razorpay/verify/route.ts": "verifyCheckoutSignature",
+      "src/app/api/cron/maintenance/route.ts": "CRON_SECRET",
+    };
+    for (const [file, guard] of Object.entries(routes)) {
+      expect(read(file), file).toContain('dynamic = "force-dynamic"');
+      expect(read(file), file).toContain(guard);
+    }
+  });
+
+  it("never lets client components import server-only commerce modules", () => {
+    for (const f of files.filter((x) => /\.(ts|tsx)$/.test(x) && !/\.test\.tsx?$/.test(x))) {
+      if (!read(f).trimStart().startsWith('"use client"')) continue;
+      expect(read(f), f).not.toMatch(/@\/lib\/(commerce\/(server|checkout|refunds|enquiries|newsletter)|supabase\/service|payments\/razorpay)/);
+    }
+  });
 });

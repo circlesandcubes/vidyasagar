@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import { Flash } from "@/components/flash";
 import { PageIntro } from "@/components/page-intro";
 import { createUserClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { addCorrectionAction, triageReportAction } from "@/app/admin/actions";
 export const metadata = { title: "Error reports" };
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireRole(["admin", "curator"], "/admin/reports");
   const params = await searchParams;
   const client = await createUserClient();
   const { data: reports } = (await client?.from("content_error_reports").select("*, book:books(id, title)").order("created_at", { ascending: false }).limit(100)) ?? { data: [] };

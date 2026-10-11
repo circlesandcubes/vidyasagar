@@ -16,14 +16,17 @@ export async function clientKey(scope: string): Promise<string> {
  * true  = allowed.
  * false = over the limit OR the limiter is unavailable (fails closed: for
  *         abuse-prone public forms, refusing is safer than accepting unchecked).
+ *         `failOpen` is for sign-in flows, which Supabase Auth already limits: a
+ *         limiter outage must not lock every customer out.
  */
-export async function allowRequest(scope: string, max: number, windowSeconds: number): Promise<boolean> {
+export async function allowRequest(scope: string, max: number, windowSeconds: number, options: { failOpen?: boolean } = {}): Promise<boolean> {
   const service = createServiceClient();
-  if (!service) return false;
+  if (!service) return options.failOpen === true;
   const { data, error } = await service.rpc("check_rate_limit", {
     p_key: await clientKey(scope),
     p_max: max,
     p_window_seconds: windowSeconds,
   });
-  return !error && data === true;
+  if (error) return options.failOpen === true;
+  return data === true;
 }

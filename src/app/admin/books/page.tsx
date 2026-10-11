@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { STATUS_LABELS } from "@/lib/seller/book-defaults";
@@ -8,6 +9,7 @@ export const metadata = { title: "Books and reviews" };
 const FILTERS = ["submitted", "editorial_review", "changes_requested", "approved", "published", "draft", "withdrawn", "rejected", "archived"];
 
 export default async function AdminBooksPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  await requireRole(["admin", "curator"], "/admin/books");
   const { status } = await searchParams;
   const client = await createUserClient();
   let query = client?.from("books").select("id, title, status, submitted_by, updated_at").order("updated_at", { ascending: false }).limit(200);

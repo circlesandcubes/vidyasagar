@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { safeNextPath } from "@/lib/auth/redirect";
+import { allowRequest } from "@/lib/rate-limit";
 import { SITE_URL } from "@/lib/site";
 import { createUserClient } from "@/lib/supabase/server";
 import {
@@ -25,6 +26,7 @@ export async function loginAction(formData: FormData) {
   const next = safeNextPath(String(formData.get("next") ?? ""));
   const parsed = loginSchema.safeParse(formDataToObject(formData));
   if (!parsed.success) redirect(`/login?error=invalid_credentials&next=${encodeURIComponent(next)}`);
+  if (!(await allowRequest("login", 15, 600, { failOpen: true }))) redirect(`/login?error=rate_limited&next=${encodeURIComponent(next)}`);
   const client = await createUserClient();
   if (!client) redirect("/login?error=not_configured");
   const { error } = await client.auth.signInWithPassword(parsed.data);
@@ -35,6 +37,7 @@ export async function loginAction(formData: FormData) {
 export async function registerAction(formData: FormData) {
   const parsed = registerSchema.safeParse(formDataToObject(formData));
   if (!parsed.success) redirect("/register?error=invalid_input");
+  if (!(await allowRequest("register", 8, 3600, { failOpen: true }))) redirect("/register?error=rate_limited");
   const client = await createUserClient();
   if (!client) redirect("/register?error=not_configured");
   await client.auth.signUp({
@@ -52,6 +55,7 @@ export async function registerAction(formData: FormData) {
 export async function forgotPasswordAction(formData: FormData) {
   const parsed = forgotPasswordSchema.safeParse(formDataToObject(formData));
   if (!parsed.success) redirect("/forgot-password?error=invalid_input");
+  if (!(await allowRequest("forgot", 5, 3600, { failOpen: true }))) redirect("/forgot-password?error=rate_limited");
   const client = await createUserClient();
   if (!client) redirect("/forgot-password?error=not_configured");
   await client.auth.resetPasswordForEmail(parsed.data.email, {

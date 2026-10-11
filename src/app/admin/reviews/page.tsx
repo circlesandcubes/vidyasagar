@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import { Flash } from "@/components/flash";
 import { PageIntro } from "@/components/page-intro";
 import { createUserClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { moderateReviewAction } from "@/app/admin/reviews/actions";
 export const metadata = { title: "Review moderation" };
 
 export default async function ReviewModerationPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireRole(["admin", "curator"], "/admin/reviews");
   const params = await searchParams;
   const client = await createUserClient();
   const { data } = (await client?.from("book_reviews").select("id, rating, body, display_name, status, created_at, book:books(title)").order("created_at", { ascending: false }).limit(100)) ?? { data: [] };

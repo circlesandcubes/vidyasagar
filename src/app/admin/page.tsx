@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { createUserClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { createUserClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverview() {
+  await requireRole(["admin", "curator"], "/admin");
   const client = await createUserClient();
   const count = async (table: string, filter?: (q: any) => any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!client) return 0;

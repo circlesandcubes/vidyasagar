@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Refreshes the Supabase session cookie and keeps signed-out visitors out of
 // account areas. Authorisation (roles) is enforced in the pages/actions and,
 // ultimately, by row-level security; this is a convenience redirect only.
-const PROTECTED_PREFIXES = ["/account", "/sell", "/admin", "/review", "/checkout/pay"];
+const PROTECTED_PREFIXES = ["/account", "/sell", "/admin", "/review", "/checkout", "/orders"];
 
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -39,5 +39,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/sell/:path*", "/admin/:path*", "/review/:path*", "/checkout/pay/:path*", "/login", "/register"],
+  matcher: ["/account/:path*", "/sell/:path*", "/admin/:path*", "/review/:path*", "/checkout/:path*", "/checkout", "/orders/:path*", "/orders", "/login", "/register"],
 };

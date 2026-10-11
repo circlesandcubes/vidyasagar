@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Flash } from "@/components/flash";
 import { PageIntro } from "@/components/page-intro";
-import { getCurrentRoles } from "@/lib/auth/session";
+import { getCurrentRoles, requireRole } from "@/lib/auth/session";
 import { NOTE_REQUIRED, nextStatusesForStaff, type BookStatus } from "@/lib/catalogue/lifecycle";
 import { STATUS_LABELS } from "@/lib/seller/book-defaults";
 import { createUserClient } from "@/lib/supabase/server";
@@ -20,6 +20,7 @@ type Json = Record<string, string>;
 export default async function AdminBookPage({
   params, searchParams,
 }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireRole(["admin", "curator"], "/admin/books");
   const { id } = await params;
   const query = await searchParams;
   if (!UUID.test(id)) notFound();

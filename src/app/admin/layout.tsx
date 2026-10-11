@@ -12,6 +12,8 @@ const ADMIN_NAV = [
   { href: "/admin/applications", label: "Seller applications" },
   { href: "/admin/books", label: "Books and reviews" },
   { href: "/admin/reports", label: "Error reports" },
+  { href: "/admin/skills", label: "Skills" },
+  { href: "/admin/collections", label: "Collections" },
   { href: "/admin/personalisation", label: "Personalisation" },
   { href: "/admin/reviews", label: "Customer reviews" },
   { href: "/admin/commerce", label: "Commerce" },
@@ -21,6 +23,8 @@ const ADMIN_NAV = [
   { href: "/admin/enquiries", label: "Bulk enquiries" },
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/emails", label: "Email log" },
+  { href: "/admin/users", label: "Users and roles" },
+  { href: "/admin/audit", label: "Audit log" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;
 

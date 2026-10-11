@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/session";
 import { Flash } from "@/components/flash";
 import { PageIntro } from "@/components/page-intro";
 import { createUserClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { reviewApplicationAction } from "@/app/admin/actions";
 export const metadata = { title: "Seller applications" };
 
 export default async function ApplicationsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireRole(["admin", "curator"], "/admin/applications");
   const params = await searchParams;
   const client = await createUserClient();
   const { data: apps } = (await client?.from("seller_applications").select("*").order("created_at", { ascending: false }).limit(100)) ?? { data: [] };
