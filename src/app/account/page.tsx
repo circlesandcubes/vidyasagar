@@ -21,6 +21,11 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <Flash searchParams={params} />
         <nav aria-label="Account sections">
           <ul className="plain-list">
+            <li><Link href="/account/profile">Profile</Link></li>
+            <li><Link href="/account/addresses">Delivery addresses</Link></li>
+            <li><Link href="/account/saved">Saved books</Link></li>
+            <li><Link href="/account/interests">Interests</Link></li>
+            <li><Link href="/account/recommendations">Suggestions for you</Link></li>
             {(roles.includes("author") || roles.includes("publisher")) && <li><Link href="/sell">Your books</Link></li>}
             {!roles.includes("author") && !roles.includes("publisher") && <li><Link href="/join">List your book as an author or publisher</Link></li>}
             {roles.includes("reviewer") && <li><Link href="/review">Books assigned to you for review</Link></li>}

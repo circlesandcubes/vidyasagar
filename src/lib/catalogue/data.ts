@@ -14,6 +14,7 @@ import {
 } from "@/lib/catalogue/queries";
 import type { CatalogueClient } from "@/lib/catalogue/queries";
 import { buildSkillTree } from "@/lib/catalogue/skills";
+import type { PersonalisationTemplate } from "@/lib/personalisation";
 
 /**
  * Public, read-only client using the anon key. Returns null when Supabase is not
@@ -81,4 +82,60 @@ export const getCorrectionsForBook = cache(async (bookId: string): Promise<Publi
     .eq("book_id", bookId)
     .order("corrected_on", { ascending: false });
   return (data ?? []) as PublicCorrection[];
+});
+
+type TemplateRow = {
+  id: string; slug: string; name: string; description: string | null; preview_note: string | null;
+  price_adjustment_minor: number; lead_time_days: number | null;
+  fields: {
+    key: string; label: string; help_text: string | null; field_type: "text" | "textarea" | "choice";
+    is_required: boolean; min_length: number; max_length: number; choices: unknown; display_order: number;
+  }[];
+};
+
+/** Active personalisation templates enabled for a published book (RLS-limited). */
+export const getPersonalisationForBook = cache(async (bookId: string): Promise<PersonalisationTemplate[]> => {
+  const client = createPublicClient();
+  if (!client) return [];
+  const { data } = await client
+    .from("book_personalisation")
+    .select(
+      "template:personalisation_templates(id, slug, name, description, preview_note, price_adjustment_minor, lead_time_days, fields:personalisation_fields(key, label, help_text, field_type, is_required, min_length, max_length, choices, display_order))",
+    )
+    .eq("book_id", bookId)
+    .eq("is_enabled", true);
+  const out: PersonalisationTemplate[] = [];
+  for (const row of data ?? []) {
+    const t = (Array.isArray(row.template) ? row.template[0] : row.template) as TemplateRow | null;
+    if (!t) continue;
+    out.push({
+      ...t,
+      fields: [...t.fields]
+        .sort((a, b) => a.display_order - b.display_order)
+        .map((f) => ({ ...f, choices: Array.isArray(f.choices) ? (f.choices as unknown[]).map(String) : null })),
+    });
+  }
+  return out;
+});
+
+export type PublicReview = { id: string; rating: number; body: string; display_name: string | null; created_at: string };
+
+/** Empty unless the reviews feature is enabled: the RLS policy checks the setting. */
+export const getPublishedReviews = cache(async (bookId: string): Promise<PublicReview[]> => {
+  const client = createPublicClient();
+  if (!client) return [];
+  const { data } = await client
+    .from("book_reviews")
+    .select("id, rating, body, display_name, created_at")
+    .eq("book_id", bookId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return (data ?? []) as PublicReview[];
+});
+
+export const getPublicSetting = cache(async (key: string): Promise<boolean> => {
+  const client = createPublicClient();
+  if (!client) return false;
+  const { data } = await client.from("site_settings").select("value").eq("key", key).maybeSingle();
+  return data?.value === true;
 });

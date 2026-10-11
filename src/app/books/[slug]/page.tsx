@@ -9,9 +9,10 @@ import { PurchaseOptions } from "@/components/purchase-options";
 import { ShareLinks } from "@/components/share-links";
 import { VerificationBadges } from "@/components/verification-badges";
 import { VerificationPanel } from "@/components/verification-panel";
+import { saveBookAction } from "@/app/account/actions";
 import { createBookMetadata } from "@/lib/book-metadata";
 import { formatAgeRange } from "@/lib/catalogue/ages";
-import { getCorrectionsForBook, getPublishedBookBySlug } from "@/lib/catalogue/data";
+import { getCorrectionsForBook, getPersonalisationForBook, getPublishedBookBySlug, getPublishedReviews } from "@/lib/catalogue/data";
 import { AVAILABILITY_LABELS, FORMAT_LABELS } from "@/lib/catalogue/filters";
 import { purchaseOptionsForBook } from "@/lib/catalogue/purchase";
 import { bookJsonLd } from "@/lib/catalogue/seo";
@@ -57,7 +58,11 @@ export default async function BookPage({ params }: BookPageProps) {
   const verification = summariseVerification(book.reviews);
   const options = purchaseOptionsForBook(book.editions);
   const path = `/books/${book.slug}`;
-  const corrections = await getCorrectionsForBook(book.id);
+  const [corrections, personalisation, reviews] = await Promise.all([
+    getCorrectionsForBook(book.id),
+    getPersonalisationForBook(book.id),
+    getPublishedReviews(book.id),
+  ]);
 
   return (
     <main id="main-content" className="detail-main">
@@ -115,6 +120,14 @@ export default async function BookPage({ params }: BookPageProps) {
           <VerificationPanel reviews={book.reviews} />
           <PurchaseOptions options={options} />
 
+          {personalisation.length > 0 && (
+            <section className="panel" aria-labelledby="personalise-heading">
+              <h2 id="personalise-heading">Personalise this book</h2>
+              <p>{personalisation.map((t) => t.name).join(", ")} available.</p>
+              <p><Link className="button" href={`/books/${book.slug}/personalise`}>Preview personalisation</Link></p>
+            </section>
+          )}
+
           {book.editions.length > 0 && (
             <section className="panel" aria-labelledby="editions-heading">
               <h2 id="editions-heading">{book.editions.length === 1 ? "Edition" : "Editions"}</h2>
@@ -163,6 +176,22 @@ export default async function BookPage({ params }: BookPageProps) {
             </section>
           )}
 
+          {reviews.length > 0 && (
+            <section className="panel" aria-labelledby="reviews-heading">
+              <h2 id="reviews-heading">Reader reviews</h2>
+              <p className="panel-footnote">Opinions from readers, checked before publishing. Not part of Vidyasagar’s review records.</p>
+              <ul className="plain-list">
+                {reviews.map((r) => (
+                  <li key={r.id}>
+                    <strong>{r.rating} out of 5</strong> — {r.display_name ?? "A reader"}
+                    <p>{r.body}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="small"><Link href={`/books/${book.slug}/review`}>Write a review</Link></p>
+            </section>
+          )}
+
           {corrections.length > 0 && (
             <section className="panel" aria-labelledby="corrections-heading">
               <h2 id="corrections-heading">Corrections</h2>
@@ -175,6 +204,10 @@ export default async function BookPage({ params }: BookPageProps) {
               </ul>
             </section>
           )}
+
+          <form action={saveBookAction.bind(null, book.id, book.slug)}>
+            <button className="button" type="submit">Save this book</button>
+          </form>
 
           <p className="small">
             <Link href={`/report-error?book=${encodeURIComponent(book.slug)}&path=${encodeURIComponent(path)}`}>
