@@ -43,3 +43,10 @@ Object.assign(MESSAGES, {
   refund_failed: { tone: "error", text: "The refund could not be completed. Nothing was changed, or it was recorded as requested for follow-up." },
   gateway_unavailable: { tone: "error", text: "The payment gateway is not configured, so it cannot refund. Confirm a manual refund instead." },
 });
+Object.assign(MESSAGES, {
+  submitted_enquiry: { tone: "info", text: "Thank you. We have your enquiry and will reply by email. This is an acknowledgement, not a quotation." },
+});
+Object.assign(MESSAGES, {
+  validity_required: { tone: "error", text: "Set a validity date in the future before issuing." },
+  lines_required: { tone: "error", text: "Add at least one line before issuing." },
+});

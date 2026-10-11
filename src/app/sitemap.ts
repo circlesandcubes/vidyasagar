@@ -41,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/verified-knowledge",
     "/verified-knowledge/how-it-works",
     "/content-standards",
+    "/institutions",
   ];
 
   return [

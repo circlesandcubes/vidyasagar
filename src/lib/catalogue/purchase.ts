@@ -13,7 +13,9 @@ export type ExternalChannel = Extract<PurchaseChannel, "amazon" | "flipkart">;
 export interface PurchaseOption {
   channel: ExternalChannel;
   label: string;
+  /** Internal redirect (/go/…) that records the click, then forwards to the approved destination. */
   href: string;
+  destination: string;
   /** Always sponsored: Vidyasagar may earn a commission on these links. */
   rel: string;
   editionId: string;
@@ -44,7 +46,8 @@ function toOption(editionId: string, record: PurchaseChannelRecord): PurchaseOpt
   return {
     channel: record.channel,
     label: LABELS[record.channel],
-    href: record.destination_url,
+    href: `/go/${editionId}/${record.channel}?s=book_page`,
+    destination: record.destination_url,
     rel: "sponsored nofollow noopener noreferrer",
     editionId,
   };

@@ -122,6 +122,7 @@ export default async function BookPage({ params }: BookPageProps) {
           <VerificationPanel reviews={book.reviews} />
           <DirectPurchase offers={offers} returnTo={path} title={book.title} />
           <PurchaseOptions options={options} />
+          <p className="small"><Link href={`/institutions/enquiry?book=${book.slug}`}>Need many copies for a school or library? Send an enquiry.</Link></p>
 
           {personalisation.length > 0 && (
             <section className="panel" aria-labelledby="personalise-heading">

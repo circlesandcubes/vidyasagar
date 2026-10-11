@@ -18,6 +18,8 @@ const ADMIN_NAV = [
   { href: "/admin/prices", label: "Prices and stock" },
   { href: "/admin/discounts", label: "Discounts" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/enquiries", label: "Bulk enquiries" },
+  { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/emails", label: "Email log" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;

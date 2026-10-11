@@ -20,6 +20,7 @@ export function SiteFooter() {
           <Link href="/collections">Collections</Link>
           <Link href="/authors">Authors</Link>
           <Link href="/publishers">Publishers</Link>
+          <Link href="/institutions">For institutions</Link>
         </nav>
 
         <nav className="footer-column" aria-label="Trust">
