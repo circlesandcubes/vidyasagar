@@ -4,9 +4,13 @@ export default function NotFound() {
   return (
     <main id="main-content" className="not-found">
       <div>
-        <p className="eyebrow">Not in this orbit</p>
-        <h1>We couldn’t find that book.</h1>
-        <Link className="text-link" href="/books">Back to the catalogue <span aria-hidden="true">↗</span></Link>
+        <h1>Page not found</h1>
+        <p>We couldn&apos;t find what you were looking for.</p>
+        <p>
+          <Link className="button" href="/books">
+            Browse books
+          </Link>
+        </p>
       </div>
     </main>
   );
