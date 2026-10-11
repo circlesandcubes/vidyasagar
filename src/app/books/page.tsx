@@ -1,31 +1,39 @@
 import type { Metadata } from "next";
-import { BookCard } from "@/components/book-card";
-import { getPublishedBooks } from "@/lib/books";
+import { CatalogueResults } from "@/components/catalogue-results";
+import { PageIntro } from "@/components/page-intro";
+import { createPageMetadata } from "@/lib/book-metadata";
+import type { SearchParams } from "@/lib/catalogue/filters";
+import { hasQueryParams } from "@/lib/search-params";
 
-export const dynamic = "force-dynamic";
+type Props = { searchParams: Promise<SearchParams> };
 
-export const metadata: Metadata = {
-  title: "Books",
-  description: "Explore the books in the Vidyasagar catalogue.",
-};
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const base = createPageMetadata({
+    title: "Books",
+    description: "Browse children's books by age, skill, author and more in the Vidyasagar catalogue.",
+    path: "/books",
+  });
+  // Filtered and paginated views are not separate pages for search engines.
+  return hasQueryParams(params) ? { ...base, robots: { index: false, follow: true } } : base;
+}
 
-export default async function BooksPage() {
-  const books = await getPublishedBooks();
-
+export default async function BooksPage({ searchParams }: Props) {
+  const params = await searchParams;
   return (
     <main id="main-content">
       <div className="content-wrap">
-        <header className="page-intro">
-          <p className="eyebrow">The catalogue</p>
-          <h1 className="page-heading">Books for curious minds.</h1>
-          <p className="page-lede">Questions about our universe, made for sharing out loud.</p>
-        </header>
+        <PageIntro
+          eyebrow="The catalogue"
+          title="Books for curious minds."
+          lede="Browse by age, skill, author or format. Every listing shows who has reviewed it."
+        />
         <section className="catalogue-section" aria-label="Published books">
-          <div className="book-grid">
-            {books.length ? books.map((book, index) => <BookCard key={book.id} book={book} index={index} />) : (
-              <p className="empty-state">No books are available yet. New titles will appear here when they are ready to share.</p>
-            )}
-          </div>
+          <CatalogueResults
+            params={params}
+            basePath="/books"
+            emptyMessage="No books are available yet. New titles will appear here when they are ready to share."
+          />
         </section>
       </div>
     </main>
