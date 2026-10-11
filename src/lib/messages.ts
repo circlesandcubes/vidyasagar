@@ -32,3 +32,14 @@ export function messageFor(code: string | string[] | undefined) {
   const key = Array.isArray(code) ? code[0] : code;
   return key && Object.hasOwn(MESSAGES, key) ? MESSAGES[key] : null;
 }
+Object.assign(MESSAGES, {
+  paid: { tone: "info", text: "Thank you. Your payment was received." },
+  payment_pending: { tone: "info", text: "We are confirming your payment. This page will update once the bank confirms it; you do not need to pay again." },
+  order_cancelled: { tone: "info", text: "Order cancelled." },
+  order_unavailable: { tone: "error", text: "That order cannot be changed." },
+});
+Object.assign(MESSAGES, {
+  commerce_not_ready: { tone: "error", text: "Online sales cannot be turned on until every required check on this page passes." },
+  refund_failed: { tone: "error", text: "The refund could not be completed. Nothing was changed, or it was recorded as requested for follow-up." },
+  gateway_unavailable: { tone: "error", text: "The payment gateway is not configured, so it cannot refund. Confirm a manual refund instead." },
+});

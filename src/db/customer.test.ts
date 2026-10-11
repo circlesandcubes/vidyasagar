@@ -103,7 +103,7 @@ describe("personalisation templates", () => {
 describe("site settings", () => {
   it("ship with optional features off and expose only public keys", async () => {
     const rows = await asAnon(db, () => q<{ key: string; value: unknown }>("select key, value from public.site_settings order by key"));
-    expect(rows.rows).toEqual([{ key: "newsletter_enabled", value: false }, { key: "reviews_enabled", value: false }]);
+    expect(rows.rows).toEqual([{ key: "direct_sales_enabled", value: false }, { key: "newsletter_enabled", value: false }, { key: "reviews_enabled", value: false }]);
     await q("insert into public.site_settings (key, value, is_public) values ('secret_thing', '1', false)");
     expect((await asAnon(db, () => q("select 1 from public.site_settings where key='secret_thing'"))).rows).toHaveLength(0);
   });

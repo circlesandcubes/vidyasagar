@@ -31,6 +31,14 @@ export function SiteFooter() {
           <Link href="/join">List your book</Link>
         </nav>
 
+        <nav className="footer-column" aria-label="Policies">
+          <h2>Policies</h2>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms of sale</Link>
+          <Link href="/shipping">Delivery</Link>
+          <Link href="/returns">Returns</Link>
+        </nav>
+
         <div className="footer-column">
           <h2>Circles &amp; Cubes</h2>
           <p>

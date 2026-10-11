@@ -139,3 +139,30 @@ export const getPublicSetting = cache(async (key: string): Promise<boolean> => {
   const { data } = await client.from("site_settings").select("value").eq("key", key).maybeSingle();
   return data?.value === true;
 });
+
+export type DirectOffer = {
+  editionId: string;
+  label: string;
+  listMinor: number;
+  saleMinor: number | null;
+  taxRateBps: number;
+};
+
+/** Active on-site prices for a book (public by RLS: active price + published book). */
+export async function getDirectOffers(bookId: string): Promise<DirectOffer[]> {
+  const client = createPublicClient();
+  if (!client) return [];
+  const { data: sales } = await client.from("site_settings").select("value").eq("key", "direct_sales_enabled").maybeSingle();
+  if (sales?.value !== true) return [];
+  const { data } = await client
+    .from("book_editions")
+    .select("id, format, availability, prices:product_prices(list_price_minor, sale_price_minor, tax_rate_bps, is_active)")
+    .eq("book_id", bookId);
+  const offers: DirectOffer[] = [];
+  for (const e of (data ?? []) as unknown as { id: string; format: string; availability: string; prices: { list_price_minor: number; sale_price_minor: number | null; tax_rate_bps: number; is_active: boolean }[] }[]) {
+    const price = e.prices?.find((p) => p.is_active);
+    if (!price || e.availability !== "available") continue;
+    offers.push({ editionId: e.id, label: e.format, listMinor: price.list_price_minor, saleMinor: price.sale_price_minor, taxRateBps: price.tax_rate_bps });
+  }
+  return offers;
+}

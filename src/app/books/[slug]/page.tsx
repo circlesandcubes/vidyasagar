@@ -6,13 +6,14 @@ import { BookSkills } from "@/components/book-skills";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
 import { PurchaseOptions } from "@/components/purchase-options";
+import { DirectPurchase } from "@/components/direct-purchase";
 import { ShareLinks } from "@/components/share-links";
 import { VerificationBadges } from "@/components/verification-badges";
 import { VerificationPanel } from "@/components/verification-panel";
 import { saveBookAction } from "@/app/account/actions";
 import { createBookMetadata } from "@/lib/book-metadata";
 import { formatAgeRange } from "@/lib/catalogue/ages";
-import { getCorrectionsForBook, getPersonalisationForBook, getPublishedBookBySlug, getPublishedReviews } from "@/lib/catalogue/data";
+import { getCorrectionsForBook, getDirectOffers, getPersonalisationForBook, getPublishedBookBySlug, getPublishedReviews } from "@/lib/catalogue/data";
 import { AVAILABILITY_LABELS, FORMAT_LABELS } from "@/lib/catalogue/filters";
 import { purchaseOptionsForBook } from "@/lib/catalogue/purchase";
 import { bookJsonLd } from "@/lib/catalogue/seo";
@@ -58,10 +59,11 @@ export default async function BookPage({ params }: BookPageProps) {
   const verification = summariseVerification(book.reviews);
   const options = purchaseOptionsForBook(book.editions);
   const path = `/books/${book.slug}`;
-  const [corrections, personalisation, reviews] = await Promise.all([
+  const [corrections, personalisation, reviews, offers] = await Promise.all([
     getCorrectionsForBook(book.id),
     getPersonalisationForBook(book.id),
     getPublishedReviews(book.id),
+    getDirectOffers(book.id),
   ]);
 
   return (
@@ -118,6 +120,7 @@ export default async function BookPage({ params }: BookPageProps) {
         <div className="book-detail-body">
           <BookSkills links={book.skills} />
           <VerificationPanel reviews={book.reviews} />
+          <DirectPurchase offers={offers} returnTo={path} title={book.title} />
           <PurchaseOptions options={options} />
 
           {personalisation.length > 0 && (

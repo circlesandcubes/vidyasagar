@@ -16,7 +16,7 @@ const read = (f: string) => readFileSync(join(process.cwd(), f), "utf8");
 
 describe("architecture", () => {
   it("keeps session-dependent pages dynamic so they are never prerendered", () => {
-    const protectedRoots = ["src/app/admin", "src/app/sell", "src/app/review", "src/app/account"];
+    const protectedRoots = ["src/app/admin", "src/app/sell", "src/app/review", "src/app/account", "src/app/checkout", "src/app/orders"];
     const pages = files.filter((f) => /\/(page|layout)\.tsx$/.test(f) && protectedRoots.some((r) => f.startsWith(r)));
     expect(pages.length).toBeGreaterThan(0);
     // A layout covers its pages; check the root layout/page of each area plus every page without one.
@@ -29,15 +29,18 @@ describe("architecture", () => {
   });
 
   it("only allows the service-role client in server-only intake, webhook and job code", () => {
-    const allowed = [
+    const allowedExact = [
       "src/lib/supabase/service.ts",
       "src/lib/rate-limit.ts",
       "src/app/report-error/actions.ts",
+      "src/lib/commerce/server.ts",
     ];
+    // Webhook/cron routes and the commerce helpers that wrap the service client.
+    const allowed = { includes: (f: string) => allowedExact.includes(f) };
     const importers = files.filter(
       (f) => /\.(ts|tsx)$/.test(f) && !f.endsWith(".test.ts") && /@\/lib\/supabase\/service/.test(read(f)),
     );
-    for (const f of importers) expect(allowed, `${f} may not import the service-role client`).toContain(f);
+    for (const f of importers) expect(allowed.includes(f), `${f} may not import the service-role client`).toBe(true);
   });
 
   it("never reads the service-role key outside its module", () => {
