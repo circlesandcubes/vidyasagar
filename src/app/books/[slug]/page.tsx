@@ -11,7 +11,7 @@ import { VerificationBadges } from "@/components/verification-badges";
 import { VerificationPanel } from "@/components/verification-panel";
 import { createBookMetadata } from "@/lib/book-metadata";
 import { formatAgeRange } from "@/lib/catalogue/ages";
-import { getPublishedBookBySlug } from "@/lib/catalogue/data";
+import { getCorrectionsForBook, getPublishedBookBySlug } from "@/lib/catalogue/data";
 import { AVAILABILITY_LABELS, FORMAT_LABELS } from "@/lib/catalogue/filters";
 import { purchaseOptionsForBook } from "@/lib/catalogue/purchase";
 import { bookJsonLd } from "@/lib/catalogue/seo";
@@ -57,6 +57,7 @@ export default async function BookPage({ params }: BookPageProps) {
   const verification = summariseVerification(book.reviews);
   const options = purchaseOptionsForBook(book.editions);
   const path = `/books/${book.slug}`;
+  const corrections = await getCorrectionsForBook(book.id);
 
   return (
     <main id="main-content" className="detail-main">
@@ -161,6 +162,25 @@ export default async function BookPage({ params }: BookPageProps) {
               </ul>
             </section>
           )}
+
+          {corrections.length > 0 && (
+            <section className="panel" aria-labelledby="corrections-heading">
+              <h2 id="corrections-heading">Corrections</h2>
+              <ul className="plain-list">
+                {corrections.map((c) => (
+                  <li key={c.id}>
+                    <strong>{formatDate(c.corrected_on)}:</strong> {c.summary}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <p className="small">
+            <Link href={`/report-error?book=${encodeURIComponent(book.slug)}&path=${encodeURIComponent(path)}`}>
+              Report an error in this listing
+            </Link>
+          </p>
 
           <ShareLinks url={absoluteUrl(path)} title={book.title} />
         </div>

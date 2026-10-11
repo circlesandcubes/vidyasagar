@@ -27,6 +27,8 @@ export function SiteFooter() {
           <Link href="/verified-knowledge">Verified Knowledge</Link>
           <Link href="/verified-knowledge/how-it-works">How review works</Link>
           <Link href="/content-standards">Content standards</Link>
+          <Link href="/report-error">Report an error</Link>
+          <Link href="/join">List your book</Link>
         </nav>
 
         <div className="footer-column">

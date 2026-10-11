@@ -3,32 +3,14 @@
 // This does NOT replace testing against a live Supabase project (see
 // books.integration.test.ts): PGlite emulates the anon/authenticated roles
 // but not Supabase Auth or PostgREST.
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
-import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { asAnon as asAnonRole, migrationFiles, newDb } from "./test-db";
 
 const MIGRATIONS_DIR = join(process.cwd(), "supabase", "migrations");
-const migrationFiles = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql")).sort();
-
-async function newDb(upToIndex = migrationFiles.length) {
-  const db = new PGlite({ extensions: { pgcrypto } });
-  await db.exec("create role anon nologin; create role authenticated nologin;");
-  for (const file of migrationFiles.slice(0, upToIndex)) {
-    await db.exec(readFileSync(join(MIGRATIONS_DIR, file), "utf8"));
-  }
-  return db;
-}
-
-async function asAnon<T>(db: PGlite, fn: () => Promise<T>): Promise<T> {
-  await db.exec("set role anon");
-  try {
-    return await fn();
-  } finally {
-    await db.exec("reset role");
-  }
-}
+const asAnon = <T,>(db: PGlite, fn: () => Promise<T>) => asAnonRole(db, fn);
 
 describe("catalogue migrations", () => {
   let db: PGlite;

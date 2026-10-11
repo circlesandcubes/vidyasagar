@@ -68,3 +68,17 @@ export const getCollections = cache(async () => {
   const client = createPublicClient();
   return client ? fetchCollections(client) : [];
 });
+
+export type PublicCorrection = { id: string; summary: string; corrected_on: string };
+
+/** Published corrections for a published book (RLS limits rows; this just selects them). */
+export const getCorrectionsForBook = cache(async (bookId: string): Promise<PublicCorrection[]> => {
+  const client = createPublicClient();
+  if (!client) return [];
+  const { data } = await client
+    .from("content_corrections")
+    .select("id, summary, corrected_on")
+    .eq("book_id", bookId)
+    .order("corrected_on", { ascending: false });
+  return (data ?? []) as PublicCorrection[];
+});

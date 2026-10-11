@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/authors", label: "Authors" },
   { href: "/verified-knowledge", label: "Verified Knowledge" },
   { href: "/search", label: "Search" },
+  { href: "/account", label: "Account" },
 ] as const;
 
 export function SiteHeader() {

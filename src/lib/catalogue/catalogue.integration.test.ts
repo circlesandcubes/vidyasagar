@@ -23,7 +23,9 @@ describe.skipIf(!url || !anonKey)("Supabase public catalogue (live)", () => {
   });
 
   it("cannot read private verification evidence", async () => {
-    const { error } = await client().from("verification_evidence").select("*").limit(1);
-    expect(error).not.toBeNull();
+    // Depending on grants this is either a permission error or an empty result
+    // (RLS with no matching policy). Either way no evidence row may come back.
+    const { data } = await client().from("verification_evidence").select("*").limit(1);
+    expect(data ?? []).toHaveLength(0);
   });
 });
